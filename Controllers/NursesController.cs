@@ -1,62 +1,69 @@
 ﻿using CRUD_Operations.ModelsMS;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace CRUD_Operations.Controllers
 {
-    public class NursesController : Controller
-    {
-        AppDbContext db = new AppDbContext();
 
-        public ActionResult Index()
-        {
-            return View(db.Nurses.ToList());
-        }
+	[Microsoft.AspNetCore.Components.Route("{controller=Nurses}/{action}")]
+	public class NursesController : Controller
+	{
+		private readonly AppDbContext db;
 
-        public ActionResult Create()
-        {
-            return View();
-        }
+		public NursesController(AppDbContext dbContext)
+		{
+			db = dbContext;
+		}
 
-        [HttpPost]
-        public ActionResult CreateNurse(Nurses nurse)
-        {
-            db.Nurses.Add(nurse);
-            db.SaveChanges();
-            return RedirectToAction("Index", "Nurses");
-        }
+		public async Task<ActionResult> Index()
+		{
+			return View(await db.Nurses.ToListAsync());
+		}
 
-        [HttpPost]
-        public bool Delete(int id)
-        {
-            try
-            {
-                Nurses nurse = db.Nurses.Where(s => s.Id == id).First();
-                db.Nurses.Remove(nurse);
-                db.SaveChanges();
-                return true;
-            }
-            catch (System.Exception)
-            {
-                return false;
-            }
+		public ActionResult Create()
+		{
+			return View();
+		}
 
-        }
+		[HttpPost]
+		public ActionResult CreateNurse(Nurses nurse)
+		{
+			db.Nurses.Add(nurse);
+			db.SaveChanges();
+			return RedirectToAction("Index", "Nurses");
+		}
 
-        public ActionResult Update(int id)
-        {
-            return View(db.Nurses.Where(s => s.Id == id).First());
-        }
+		[HttpPost]
+		public async Task<bool> Delete(int id)
+		{
+			try
+			{
+				Nurses nurse = await db.Nurses.Where(s => s.Id == id).FirstOrDefaultAsync();
+				db.Nurses.Remove(nurse);
+				await db.SaveChangesAsync();
+				return true;
+			}
+			catch (System.Exception)
+			{
+				return false;
+			}
 
-        [HttpPost]
-        public ActionResult UpdateNurse(Nurses nurse)
-        {
-            Nurses d = db.Nurses.Where(s => s.Id == nurse.Id).First();
-            d.Name = nurse.Name;
-            d.Phone = nurse.Phone;
+		}
 
-            db.SaveChanges();
-            return RedirectToAction("Index", "Nurses");
-        }
-    }
+		public ActionResult Update(int id)
+		{
+			return View(db.Nurses.Where(s => s.Id == id).First());
+		}
+
+		[HttpPost]
+		public ActionResult UpdateNurse(Nurses nurse)
+		{
+			Nurses d = db.Nurses.Where(s => s.Id == nurse.Id).First();
+			d.Name = nurse.Name;
+			d.Phone = nurse.Phone;
+
+			db.SaveChanges();
+			return RedirectToAction("Index", "Nurses");
+		}
+	}
 }

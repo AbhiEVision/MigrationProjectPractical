@@ -1,14 +1,22 @@
 using CRUD_Operations.ModelsMS;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
+
 namespace AdminPanelTutorial
 {
+
 	public class DoctorsController : Controller
 	{
-		AppDbContext db = new AppDbContext();
-		public ActionResult Index()
+		private readonly AppDbContext db;
+
+		public DoctorsController(AppDbContext db)
 		{
-			return View(db.Doctors.ToList());
+			this.db = db;
+		}
+
+		public async Task<ActionResult> Index()
+		{
+			return View(await db.Doctors.ToListAsync());
 		}
 		public ActionResult Create()
 		{
@@ -18,19 +26,20 @@ namespace AdminPanelTutorial
 		[HttpPost]
 		public ActionResult CreateDoctor(Doctors doctor)
 		{
+
 			db.Doctors.Add(doctor);
 			db.SaveChanges();
 			return RedirectToAction("Index", "Doctors");
 		}
 
 		[HttpPost]
-		public bool Delete(int id)
+		public async Task<bool> Delete(int id)
 		{
 			try
 			{
-				Doctors doctor = db.Doctors.Where(s => s.Id == id).First();
+				Doctors doctor = await db.Doctors.Where(s => s.Id == id).FirstOrDefaultAsync();
 				db.Doctors.Remove(doctor);
-				db.SaveChanges();
+				await db.SaveChangesAsync();
 				return true;
 			}
 			catch (System.Exception)

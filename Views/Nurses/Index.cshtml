@@ -79,10 +79,15 @@
 						if (result == true) {
 							var baseUrl = "/Nurses";
 							window.location.reload();
+							
+
 						}
 						else {
 							alert("There is a problem, Try Later!");
 						}
+
+						setTimeout(() => location.reload(), 1000);
+
 					}
 				});
 		}
